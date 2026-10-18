@@ -8,9 +8,10 @@ random.seed(0)
 
 # Parameters
 PARQUET_PATH = "train_1.parquet"   # path to your downloaded HF Parquet
-OUT_DIR      = pathlib.Path("data")
-N_TRAIN      = 1000               # how many puzzles to render for training
-N_VAL        = 100                # how many for validation
+# OUT_DIR      = pathlib.Path("data")
+OUT_DIR      = pathlib.Path("data_clean")
+N_TRAIN      = 2000 # 1000               # how many puzzles to render for training
+N_VAL        = 200  # 100                # how many for validation
 IMG_H, IMG_W = 1200, 800          # page size (portrait-ish)
 GRID_MARGIN  = 60                 # outer margin, px
 CELL_SIZE    = 28                 # output crop size for classifier (MNIST-like)
@@ -124,10 +125,10 @@ def process_split(puzzles, split_name, n_limit):
         save_crops(page, geom, puzzle, split_name, base_id=f"{i:06d}_clean")
         cv.imwrite(str(grid_dir / f"{i:06d}_clean.png"), page)
 
-        # Camera-like
-        warped = aug_camera(page)
-        save_crops(warped, geom, puzzle, split_name, base_id=f"{i:06d}_cam")
-        cv.imwrite(str(grid_dir / f"{i:06d}_cam.png"), warped)
+        # # Camera-like
+        # warped = aug_camera(page)
+        # save_crops(warped, geom, puzzle, split_name, base_id=f"{i:06d}_cam")
+        # cv.imwrite(str(grid_dir / f"{i:06d}_cam.png"), warped)
 
 def main():
     (p_train, _s_train), (p_val, _s_val) = load_puzzles(PARQUET_PATH, N_TRAIN, N_VAL)

@@ -13,12 +13,12 @@ from digitnet_model import DigitNet
 # Configuration
 random.seed(0); np.random.seed(0); tr.manual_seed(0)
 DEVICE = "cpu"           # keep CPU for portability
-DATA_DIR = "data"        # data/train/0..9, data/val/0..9
+DATA_DIR = "data_clean"        # data/train/0..9, data/val/0..9
 ARTI_DIR = "artifacts"
 os.makedirs(ARTI_DIR, exist_ok=True)
 
 BATCH = 256
-EPOCHS = 10
+EPOCHS = 4
 LR = 1e-3
 WEIGHT_DECAY = 1e-4
 LABEL_SMOOTH = 0.05
