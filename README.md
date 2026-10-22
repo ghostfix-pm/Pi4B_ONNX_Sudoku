@@ -1,1 +1,3 @@
-# Pi4B_ONNX_Sudoku
+# Pi4B ONNX Sudoku
+
+[Installation guide](Installation.md)
