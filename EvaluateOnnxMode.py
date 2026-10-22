@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from digitnet_model import DigitNet
 
-DATA_DIR = "data_clean"
+DATA_DIR = "data_v4"
 ARTI_DIR = "artifacts"
 os.makedirs(ARTI_DIR, exist_ok=True)
 
