@@ -218,3 +218,22 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project artefacts -----------------------------------------------------------
+# The generated dataset (one directory per experiment arm) and the
+# HuggingFace parquet dump are reproducible, so they stay out of git.
+# The trained models in artifacts*/ are small and committed on purpose.
+data/
+data_*/
+*.parquet
+
+# Debug images written by SudokuProcessor / RunSudokuProcessor
+compare_bgr_warped.png
+splitted_cells_grid.png
+resized_cell_*.png
+
+# Local tooling
+.coverage
+htmlcov/
+coverage.xml
+*.egg-info/

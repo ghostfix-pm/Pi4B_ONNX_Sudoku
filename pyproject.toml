@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pi4b-onnx-sudoku"
+version = "0.1.0"
+description = "Sudoku digit recognition with ONNX Runtime on a Raspberry Pi 4B, including the synthetic-data experiments"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "leputz" }]
+keywords = ["onnx", "onnxruntime", "sudoku", "raspberry-pi", "computer-vision", "opencv"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+dependencies = [
+    "numpy",
+    "opencv-python",
+    "onnxruntime",
+    "pandas",
+    "pyarrow",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+# Training and evaluation (CPU builds are enough, as in Installation.md).
+train = ["torch", "torchvision", "matplotlib"]
+# Test and lint tooling; `onnx` is only needed to build the tiny test model.
+dev = ["pytest>=7", "pytest-cov", "ruff", "onnx"]
+
+[project.scripts]
+prepare-data = "prepare_data:main"
+run-sudoku = "RunSudokuProcessor:main"
+
+[tool.setuptools]
+py-modules = [
+    "prepare_data",
+    "RunSudokuProcessor",
+    "digitnet_model",
+    "sudoku_core",
+    "sudoku_data",
+    "sudoku_processor",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
+filterwarnings = ["default"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 110
+exclude = ["tests/baseline*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = [
+    "E501",  # long lines are unavoidable in the OpenCV calls copied from the original scripts
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011", "E402", "F401"]
+# The training/evaluation scripts predate any linter in this repository and keep
+# their original formatting on purpose; only the files touched by this change
+# follow the configuration above.
+"Training.py" = ["E401", "E402", "E702", "I001"]
+"EvaluateOnnxMode.py" = ["E401", "I001", "B905"]
+"SmallNet.py" = ["E401", "I001", "F401"]
+"digitnet_model.py" = ["I001"]

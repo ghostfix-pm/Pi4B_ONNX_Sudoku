@@ -2,7 +2,7 @@
 
 This guide provides step-by-step instructions to set up the project environment on a Raspberry Pi 4B.
 
-## 1. System Infomation Check
+## 1. System Information Check
 
 Before starting, verify the system information and available resources.
 
@@ -127,9 +127,26 @@ wget https://huggingface.co/datasets/Ritvik19/Sudoku-Dataset/resolve/main/train_
 
 ## 🚀 Next Steps
 
-Now that the environment and dataset are ready, it is time to run the data preparation scripts for performance benchmarking:
+Now that the environment and dataset are ready, it is time to run the data preparation for
+performance benchmarking:
 
 ```bash
-python3 PrepareData.py
-# or v2, v3, v4...
+python3 prepare_data.py --list-variants
+python3 prepare_data.py --variant v4        # or python3 PrepareData4.py
+# or v2, v3... the wrapper scripts and --variant produce the same output
+```
+
+Then train and evaluate as before:
+
+```bash
+python3 Training.py            # writes artifacts_v4/
+python3 EvaluateOnnxMode.py    # confusion matrices + sample grid
+python3 RunSudokuProcessor.py --image data_v4/grids/val/000001_cam.png
+```
+
+Optional: run the offline test suite (it needs no dataset and no trained model).
+
+```bash
+pip install -e ".[dev]"
+python3 -m pytest -q
 ```

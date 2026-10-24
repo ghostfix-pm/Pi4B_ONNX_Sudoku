@@ -59,3 +59,63 @@ Confusion matrix (rows=true, cols=pred):
 In the original data synthesis method, for each Sudoku solution, a clean image containing the 9x9=81 grid and digits is first generated with black lines on a white background. Then, jitter, perspective transformation, and Gaussian blur are applied to the entire image to simulate real-world photography. After that, the 9x9=81 cells are evenly cropped from the photo. However, because the original clean image undergoes perspective transformation *before* being evenly cropped, the resulting 81 cells end up containing the black border lines. These border lines interfere with model training, especially the recognition of the digit 6.
 
 The improved data synthesis method instead first evenly crops the clean image into 81 cells, and then applies jitter, perspective transformation, and Gaussian blur to each individual cell. Although the digits within each cell may experience more severe distortion after the perspective transformation, the elimination of the black border line interference significantly improves model training and completely eliminates the misclassification of the digit 6.
+
+## Reproducing the Experiments
+
+All five arms of the experiment are described in one place (`sudoku_data.py`); each
+`PrepareData*.py` script is a thin wrapper that runs its own profile, so the two commands in
+each row below are equivalent.
+
+| arm | script | output | train / val | augmentation | perspective jitter | blur |
+| --- | ------ | ------ | ----------- | ------------ | ------------------ | ---- |
+| `v0` | `PrepareData.py` | `data` | 1000 / 100 | whole page | ± 20 px | 50 %, kernel 3 or 5 |
+| `v1` | `PrepareData1.py` | `data_v1` | 1000 / 100 | whole page | ± 20 px | 50 %, kernel 3 or 5 |
+| `v2` | `PrepareData2.py` | `data_v2` | 2000 / 200 | inside each cell | ± 4 px | 30 %, kernel 3 |
+| `v3` | `PrepareData3.py` | `data_v3` | 2000 / 200 | inside each cell | ± 20 px | 30 %, kernel 3 |
+| `v4` | `PrepareData4.py` | `data_v4` | 1000 / 100 | inside each cell | ± 20 px | 50 %, kernel 3 or 5 |
+
+```bash
+python3 prepare_data.py --list-variants
+python3 prepare_data.py --variant v4        # same output as python3 PrepareData4.py
+python3 prepare_data.py --variant v2 --n-train 5000 --n-val 500 --out-dir /data/sudoku_v2
+```
+
+`--parquet`, `--out-dir`, `--n-train`, `--n-val` and `--seed` override the profile defaults,
+`--no-progress` silences the tqdm bars, and `--strict` turns "the dataset is too small"
+warnings into an error. Every run prints what it actually produced:
+
+```
+variant v4 (PrepareData4.py) -> data_v4
+  augmentation: cell-level, jitter +/-20 px, blur p=0.5 kernels=(3, 5)
+  train: 1000 puzzles, 162000 crops, 1000 page images
+  val: 100 puzzles, 16200 crops, 100 page images
+```
+
+Each arm writes `data*/<split>/<0..9>/*.png` (28x28 grayscale cells, class `0` = blank) plus
+the rendered pages under `data*/grids/<split>/`. The clean crops are identical in every arm —
+only the camera-like crops differ, which is exactly what the comparison is about.
+
+## Recognition Demo
+
+```bash
+python3 RunSudokuProcessor.py --image data_v4/grids/val/000001_cam.png
+```
+
+The model is looked up in `artifacts_v4/sudoku_digitnet.onnx` (where `Training.py` writes it),
+and a generated page in the `data*/grids/` directories, so both `--image` and `--onnx` are
+optional. Use `--blank-conf-threshold`, `--warp-size`, `--blank-ink-max`, `--no-overlay`,
+`--out-dir` and `--quiet` to tune a run. When the recognised board cannot be solved the script
+lists the conflicting givens instead of only saying that the solver failed.
+
+## Tests
+
+```bash
+pip install -e ".[dev]"
+python3 -m pytest -q        # 152 tests, offline: no dataset, no trained model, no Pi
+python3 -m ruff check .
+```
+
+The suite generates its own 4-row parquet fixture and a tiny deterministic ONNX model, so it
+runs in seconds anywhere — including the solver rules, the corner ordering, the data
+augmentation of every arm, the preprocessing and the command line entry points.
+

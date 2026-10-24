@@ -37,8 +37,38 @@ tfm_val = transforms.Compose([
     transforms.Normalize((0.5,), (0.5,)),
 ])
 
+def count_images(path: str) -> int:
+    """Number of image files below *path* (``data*/<split>/<0..9>/*.png``)."""
+    return sum(len(files) for _root, _dirs, files in os.walk(path))
+
+
+def check_split(path: str) -> int:
+    """Return the number of images in *path*, failing loudly when it is empty.
+
+    An empty validation split (for instance because the dataset holds fewer
+    puzzles than ``--n-train`` asked for) used to train anyway and report
+    ``Best val acc: 0.0000``; :func:`~sudoku_data.load_puzzles` warns about the
+    short dataset, and this stops the training run before it wastes epochs.
+    """
+    if not os.path.isdir(path):
+        raise SystemExit(f"missing dataset split: {path} (run prepare_data.py first)")
+    total = count_images(path)
+    if total == 0:
+        raise SystemExit(
+            f"dataset split {path} contains no images (run prepare_data.py first)"
+        )
+    missing = [str(cls) for cls in range(10) if not os.path.isdir(os.path.join(path, str(cls)))]
+    if missing:
+        print(f"warning: {path} has no class directories for {', '.join(missing)}")
+    return total
+
+
+print(f"{DATA_DIR}: {check_split(os.path.join(DATA_DIR, 'train'))} train images, "
+      f"{check_split(os.path.join(DATA_DIR, 'val'))} val images")
+
 train_ds = datasets.ImageFolder(os.path.join(DATA_DIR, "train"), transform=tfm_train)
 val_ds   = datasets.ImageFolder(os.path.join(DATA_DIR, "val"),   transform=tfm_val)
+
 
 train_loader = DataLoader(train_ds, batch_size=BATCH, shuffle=True,  num_workers=0)
 val_loader   = DataLoader(val_ds,   batch_size=BATCH, shuffle=False, num_workers=0)
