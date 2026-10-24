@@ -9,7 +9,7 @@ random.seed(0)
 # Parameters
 PARQUET_PATH = "train_1.parquet"   # path to your downloaded HF Parquet
 # OUT_DIR      = pathlib.Path("data")
-OUT_DIR      = pathlib.Path("data_clean")
+OUT_DIR      = pathlib.Path("data")
 N_TRAIN      = 1000               # how many puzzles to render for training
 N_VAL        = 100                # how many for validation
 IMG_H, IMG_W = 1200, 800          # page size (portrait-ish)

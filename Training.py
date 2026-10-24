@@ -13,12 +13,12 @@ from digitnet_model import DigitNet
 # Configuration
 random.seed(0); np.random.seed(0); tr.manual_seed(0)
 DEVICE = "cpu"           # keep CPU for portability
-DATA_DIR = "data_v1"        # data/train/0..9, data/val/0..9
-ARTI_DIR = "artifacts"
+DATA_DIR = "data_v4"        # data/train/0..9, data/val/0..9
+ARTI_DIR = "artifacts_v4"
 os.makedirs(ARTI_DIR, exist_ok=True)
 
 BATCH = 256
-EPOCHS = 4
+EPOCHS = 10
 LR = 1e-3
 WEIGHT_DECAY = 1e-4
 LABEL_SMOOTH = 0.05
@@ -28,8 +28,8 @@ tfm_train = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),   # force 1-channel input
     transforms.ToTensor(),
     transforms.Normalize((0.5,), (0.5,)),
-    #transforms.RandomApply([transforms.GaussianBlur(3)], p=0.15),
-    #transforms.RandomAffine(degrees=5, translate=(0.02,0.02), scale=(0.95,1.05)),
+    transforms.RandomApply([transforms.GaussianBlur(3)], p=0.15),
+    transforms.RandomAffine(degrees=5, translate=(0.02,0.02), scale=(0.95,1.05)),
 ])
 tfm_val = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),   # force 1-channel input

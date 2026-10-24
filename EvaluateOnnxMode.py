@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from digitnet_model import DigitNet
 
 DATA_DIR = "data_v4"
-ARTI_DIR = "artifacts"
+ARTI_DIR = "artifacts_v4"
 os.makedirs(ARTI_DIR, exist_ok=True)
 
 ONNX_PATH = os.path.join(ARTI_DIR, "sudoku_digitnet.onnx")  # fp32
